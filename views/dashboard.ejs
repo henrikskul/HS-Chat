@@ -1,0 +1,106 @@
+<div class="row mt-5">
+    <div class="col-md-6 m-auto text-center">
+        <h1>HS-Chat</h1>
+        <p class="lead mb-3">Welcome to this open chat-room <%= user %></p>
+        <div style="display: none" id="user"><%= user %></div>
+        <a href="/users/logout" class="btn btn-secondary mb-3">Logout</a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-9">
+        <div class="card card-body border-light" style="height: 45vh; min-height: 20px; overflow: auto; background:none"  id="chat"></div>
+        <form id="messageForm">
+                <div class="form-group">
+                    <label>Enter Message</label>
+                    <textarea id="message" class="form-control"></textarea>
+                    <br>
+                    <input type="submit" id="send_btn"class="btn btn-primary" value="Send Message">
+                </div>
+            </form>
+    </div>    
+    <div class="col-md-3 mb-3">
+        <div class="card card-body bg-primary">
+            <h3 class="mb-4">Online Users:</h3>
+            <ul class="list-group" id="users"></ul>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-8">
+    </div>
+
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    (function(){
+        var element = function(id){
+            return document.getElementById(id);
+        }
+        var brukernavn = element('user').innerHTML;
+        var message = element('message');
+        var chat = element('chat');
+        var messageForm = element('messageForm');
+        var users = element('users');        
+        var socket = io.connect();
+        var div = document.createElement("div");
+
+        // lagrer brukernavn i socket-en
+        socket.emit("new user", brukernavn)
+
+        // enter knapp for enter message
+        var send_btn = element("send_btn")
+        message.addEventListener("keydown", function(event) {
+        if (event.keyCode === 13 &  !event.shiftKey) {
+            event.preventDefault();
+            send_btn.click();
+        }
+        });
+        messageForm.addEventListener('submit', e => {
+            e.preventDefault();
+            socket.emit('send message', message.value);
+            message.value = '';
+        });
+
+        socket.on('new chat', (data) => {
+            let html = '';
+            for (i=0;i<data.length;i++) {
+                if (data[i].user == brukernavn) {
+                    html += `<div class="" style="margin:0 0 0 auto"><p class="m-0"><strong>${data[i].user} (You): </strong></p></div>`;
+                    html += `<div class="card border-primary mb-3" style="width:50%; min-width:20vh; margin:0 0 0 auto" >`;
+                    html += `<p class="card-text m-0 p-2">${data[i].message}</p>`
+                    let date_list = data[i].date.split("T");
+                    let date = date_list[0];
+                    let time = date_list[1].slice(0,5);
+                    html += `<p class="card-text bg-primary"><small class="text-muted">posted ${date} at ${time}</small></p>`
+                    html += `</div>`;
+
+                } else {
+                    html += `<div class=""><p class="m-0"><strong>${data[i].user}: </strong></p></div>`;
+                    html += `<div class="card border-secondary mb-3" style="width:50%; min-width:20vh" >`;
+                    html += `<p class="card-text m-0 p-2">${data[i].message}</p>`
+                    let date_list = data[i].date.split("T");
+                    let date = date_list[0];
+                    let time = date_list[1].slice(0,5);
+                    html += `<p class="card-text bg-secondary"><small class="text-muted">posted ${date} at ${time}</small></p>`
+                    html += `</div>`;
+                }
+            }
+            chat.innerHTML = html;
+            chat.scrollTop = chat.scrollHeight;
+        });
+
+        socket.on('get users', data => {
+            let html = '';
+            for (i = 0; i < data.length; i++) {
+                html += `<li class="list-group-item mb-3"> ${data[i]} </li>`;
+            }
+            users.innerHTML = html;
+        });
+        
+
+
+
+    })();
+
+
+</script>

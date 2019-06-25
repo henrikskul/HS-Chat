@@ -22,7 +22,7 @@ server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 require('./config/passport')(passport);
 
 // DB Config
-const db = process.env.MOBGODB_URI || require('./config/keys').mongoURI;
+// const db = process.env.MOBGODB_URI; //|| require('./config/keys').mongoURI;
 
 // Connect to MongoDB
 mongoose

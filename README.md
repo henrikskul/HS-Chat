@@ -1,5 +1,5 @@
 # HS-Chat
-A chat app made with node.js, with authentication using passport and uses MongoDB.
+A chat app made with node.js, with authentication using passport, uses MongoDB for database and bootstrap for design.
 This app is being hostet at Heroku, link:
 https://hs-chatapp.herokuapp.com
 
